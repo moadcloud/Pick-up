@@ -1,0 +1,352 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no" />
+<title>Reaction Clicker – Farcaster Mini App (Pay & Play)</title>
+<!-- Farcaster miniapp SDK (used to get provider in Farcaster) -->
+<script type="module">
+  // load the SDK into global scope for use below (esm import)
+  // Note: this import is only used when running inside Farcaster MiniApp environment.
+  import { sdk } from 'https://esm.sh/@farcaster/miniapp-sdk';
+  window.__FARC_SDK__ = sdk;
+  // call ready if available (we'll also call in main script to be safe)
+  try { sdk.actions.ready(); } catch(e) { /* ignore */ }
+</script>
+
+<style>
+    * { margin:0; padding:0; box-sizing:border-box; }
+    body {
+        font-family: 'Arial', sans-serif;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        display:flex; align-items:center; justify-content:center;
+        min-height:100vh; color:white; padding:20px;
+    }
+    .game-container { text-align:center; padding:20px; max-width:600px; width:100%; }
+    h1 { font-size:2.2rem; margin-bottom:8px; text-shadow:0 2px 6px rgba(0,0,0,0.25); }
+    .score-board {
+        background: rgba(255,255,255,0.12);
+        padding:18px; border-radius:14px; margin:16px 0; backdrop-filter: blur(8px);
+    }
+    .score { font-size:2.6rem; font-weight:700; color:#fff; }
+    .timer { font-size:1.1rem; margin-top:8px; color:#ffd700; }
+    .game-area {
+        position:relative; width:100%; height:420px; background: rgba(255,255,255,0.07);
+        border-radius:14px; margin:20px 0; overflow:hidden; backdrop-filter: blur(8px);
+    }
+    .target {
+        position:absolute; width:64px; height:64px;
+        background: linear-gradient(135deg,#ff6b6b,#ee5a6f);
+        border-radius:50%; display:flex; align-items:center; justify-content:center;
+        font-size:28px; cursor:pointer; user-select:none; transition:transform .08s;
+        box-shadow: 0 8px 20px rgba(0,0,0,0.25);
+    }
+    .target:active { transform: scale(.92); }
+    /* Buttons (kept the style you provided) */
+    .btn {
+      background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+      color: white; border: none; padding: 14px 36px; font-size:1.05rem;
+      border-radius: 50px; cursor:pointer; transition: all .26s; box-shadow: 0 6px 18px rgba(0,0,0,0.28); font-weight:700;
+    }
+    .btn:hover { transform: translateY(-3px); box-shadow: 0 10px 28px rgba(0,0,0,0.36); }
+    .menu { margin-top:12px; }
+    .game-over { display:none; background: rgba(255,255,255,0.12); padding:22px; border-radius:12px; backdrop-filter: blur(8px); }
+    .game-over.show { display:block; }
+    .final-score { font-size:2.2rem; color:#ffd700; margin:12px 0; }
+    .instructions { background: rgba(255,255,255,0.08); padding:12px; border-radius:10px; margin:12px 0; font-size:0.95rem; backdrop-filter: blur(6px); }
+    /* Status box for payment flow */
+    #status { display:none; margin:12px 0; padding:12px; border-radius:10px; background: rgba(0,0,0,0.25); font-size:0.95rem; text-align:left; }
+    #status b { color:#e6f9f0; display:inline-block; width:90px; }
+    #status .ok { color:#4ade80; }
+    #status .warn { color:#fbbf24; }
+    #status .err { color:#f87171; }
+    #status a { color:#86c6ff; text-decoration:none; }
+</style>
+</head>
+<body>
+  <div class="game-container">
+    <h1>🎯 Reaction Clicker</h1>
+
+    <div id="menu">
+      <div class="instructions">
+        Click the targets as fast as you can!<br>
+        You have 30 seconds to get the highest score!
+      </div>
+
+      <div id="status" aria-live="polite"></div>
+
+      <!-- Start button is pay-gated -->
+      <div class="menu" style="margin-top:12px;">
+        <button id="startBtn" class="btn">Pay & Play</button>
+      </div>
+    </div>
+
+    <div id="gamePlay" style="display:none;">
+      <div class="score-board">
+        <div>Score</div>
+        <div class="score" id="score">0</div>
+        <div class="timer" id="timer">Time: 30s</div>
+      </div>
+
+      <div class="game-area" id="gameArea"></div>
+    </div>
+
+    <div id="gameOver" class="game-over">
+      <h2>Game Over! 🎉</h2>
+      <div class="final-score" id="finalScore">Score: 0</div>
+      <p>Nice reflexes — pay to play again or share your score on Farcaster.</p>
+      <div style="display:flex; gap:12px; justify-content:center; margin-top:10px;">
+        <button id="playAgainBtn" class="btn">Pay & Play Again</button>
+        <button id="shareBtn" class="btn" style="background: linear-gradient(135deg,#60a5fa,#2563eb);">Share</button>
+      </div>
+    </div>
+  </div>
+
+<script type="module">
+/* ======= CONFIG (you provided 0.00001 and keep other settings) ======= */
+const USE_BASE_SEPOLIA = false; // false: main Base (8453), true: Sepolia test (84532)
+const RECIPIENT = "0x02212a875c56baE7AF27A5a389FD4e8A11442692";
+const AMOUNT_ETH = "0.00001";
+
+const BASE_MAINNET = { chainId: "0x2105", explorer: "https://basescan.org/tx/" };
+const BASE_SEPOLIA = { chainId: "0x14a34", explorer: "https://sepolia.basescan.org/tx/" };
+const TARGET = USE_BASE_SEPOLIA ? BASE_SEPOLIA : BASE_MAINNET;
+
+/* ====== UI elements ====== */
+const statusEl = document.getElementById('status');
+const startBtn = document.getElementById('startBtn');
+const playAgainBtn = document.getElementById('playAgainBtn');
+const shareBtn = document.getElementById('shareBtn');
+
+const menuEl = document.getElementById('menu');
+const gamePlayEl = document.getElementById('gamePlay');
+const gameOverEl = document.getElementById('gameOver');
+
+const scoreEl = document.getElementById('score');
+const timerEl = document.getElementById('timer');
+const gameArea = document.getElementById('gameArea');
+const finalScoreEl = document.getElementById('finalScore');
+
+/* ===== helpers for status panel ===== */
+const showStatus = () => statusEl.style.display = 'block';
+const clearStatus = () => statusEl.innerHTML = '';
+const addLine = (html) => { showStatus(); statusEl.insertAdjacentHTML('beforeend', `<div>${html}</div>`); };
+
+/* ===== wallet/provider helpers (similar to your Snake flow) ===== */
+function parseEther(x){
+  const [w,f=""] = String(x).split('.');
+  const frac = (f + '0'.repeat(18)).slice(0,18);
+  return '0x' + (BigInt(w) * 10n**18n + BigInt(frac)).toString(16);
+}
+
+async function getProvider(){
+  // Try Farcaster miniapp SDK provider first (we exposed it to window.__FARC_SDK__ earlier)
+  try {
+    const sdk = window.__FARC_SDK__;
+    if (sdk?.wallet?.getEthereumProvider) {
+      const p = await sdk.wallet.getEthereumProvider();
+      if (p) return p;
+    }
+  } catch(e){ /* ignore */ }
+
+  // fallback to window.ethereum (Metamask / injected)
+  if (window.ethereum) return window.ethereum;
+
+  // final fallback: no provider
+  return null;
+}
+
+async function ensureChain(provider, chainId) {
+  const current = (await provider.request({ method:'eth_chainId' }))?.toLowerCase();
+  if (current === chainId.toLowerCase()) return;
+  try {
+    await provider.request({ method:'wallet_switchEthereumChain', params:[{ chainId }] });
+  } catch (e) {
+    // if chain is unknown to wallet, try to add then switch (some wallets support)
+    if (e?.code === 4902) {
+      await provider.request({ method:'wallet_addEthereumChain', params:[{ chainId }] });
+      await provider.request({ method:'wallet_switchEthereumChain', params:[{ chainId }] });
+    } else {
+      throw e;
+    }
+  }
+}
+
+/* ===== required payment flow (shows status and returns tx hash) ===== */
+async function requiredPayment() {
+  clearStatus();
+  addLine(`<b>Step 1:</b> locating wallet provider…`);
+  const provider = await getProvider();
+  if (!provider) {
+    addLine(`<span class="err">No wallet available.</span> Open in Farcaster or enable a wallet extension.`);
+    throw new Error('NO_PROVIDER');
+  }
+  addLine(`<span class="ok">Provider ready.</span>`);
+
+  addLine(`<b>Step 2:</b> requesting accounts…`);
+  const accounts = await provider.request({ method:'eth_requestAccounts' });
+  const from = Array.isArray(accounts) ? accounts[0] : accounts;
+  addLine(`<span class="ok">Account: ${from.slice(0,6)}…${from.slice(-4)}</span>`);
+
+  addLine(`<b>Step 3:</b> switching to Base…`);
+  await ensureChain(provider, TARGET.chainId);
+  addLine(`<span class="ok">On Base${USE_BASE_SEPOLIA ? ' Sepolia' : ''}.</span>`);
+
+  addLine(`<b>Step 4:</b> sending ${AMOUNT_ETH} ETH to ${RECIPIENT.slice(0,6)}…${RECIPIENT.slice(-4)}…`);
+  const hash = await provider.request({
+    method: 'eth_sendTransaction',
+    params: [{ from, to: RECIPIENT, value: parseEther(AMOUNT_ETH) }]
+  });
+  addLine(`<span class="ok">TX sent.</span> <a target="_blank" rel="noopener" href="${TARGET.explorer}${hash}">View on Basescan</a>`);
+  return hash;
+}
+
+/* wrapper to run an action only after successful payment attempt */
+async function payThen(action, triggerBtn) {
+  try {
+    triggerBtn.disabled = true;
+    await requiredPayment(); // throws on failure/cancel
+    // small delay so UX shows the "tx sent" line before switching UI
+    await new Promise(r=>setTimeout(r, 700));
+    await action();
+  } catch (e) {
+    console.warn('Payment gate blocked action:', e);
+    addLine(`<span class="warn">Payment required. Please try again.</span>`);
+  } finally {
+    triggerBtn.disabled = false;
+  }
+}
+
+/* ====== Reaction Clicker game logic (unchanged behaviour) ====== */
+let score = 0;
+let timeLeft = 30;
+let timerInterval = null;
+let targetInterval = null;
+
+function resetGameState() {
+  score = 0;
+  timeLeft = 30;
+  scoreEl.textContent = score;
+  timerEl.textContent = `Time: ${timeLeft}s`;
+  gameArea.innerHTML = '';
+}
+
+function startGameplay() {
+  // show gameplay area
+  menuEl.style.display = 'none';
+  gamePlayEl.style.display = 'block';
+  gameOverEl.classList.remove('show');
+
+  resetGameState();
+
+  // timer
+  timerInterval = setInterval(() => {
+    timeLeft--;
+    timerEl.textContent = `Time: ${timeLeft}s`;
+    if (timeLeft <= 0) {
+      endGame();
+    }
+  }, 1000);
+
+  // spawn targets periodically
+  targetInterval = setInterval(createTarget, 800);
+  createTarget();
+}
+
+function createTarget() {
+  if (!gameArea) return;
+  const target = document.createElement('div');
+  target.className = 'target';
+  target.textContent = '🎯';
+
+  const maxX = Math.max(0, gameArea.clientWidth - 64);
+  const maxY = Math.max(0, gameArea.clientHeight - 64);
+  const x = Math.random() * maxX;
+  const y = Math.random() * maxY;
+
+  target.style.left = x + 'px';
+  target.style.top = y + 'px';
+
+  target.onclick = () => {
+    score++;
+    scoreEl.textContent = score;
+    target.remove();
+    // spawn a fresh target instantly on hit
+    createTarget();
+  };
+
+  gameArea.appendChild(target);
+
+  // auto remove target after 1500ms if not clicked
+  setTimeout(() => { if (target.parentNode) target.remove(); }, 1500);
+}
+
+function endGame() {
+  clearInterval(timerInterval);
+  clearInterval(targetInterval);
+  timerInterval = null;
+  targetInterval = null;
+
+  gameArea.innerHTML = '';
+
+  gamePlayEl.style.display = 'none';
+  finalScoreEl.textContent = `Score: ${score}`;
+  gameOverEl.classList.add('show');
+}
+
+/* ====== Button wiring: Start & Play Again are pay-gated ====== */
+
+startBtn.addEventListener('click', async (e) => {
+  e.preventDefault();
+  // payThen will run startGameplay only after tx is sent
+  await payThen(() => startGameplay(), startBtn);
+});
+
+// Play again button (pay gated)
+playAgainBtn.addEventListener('click', async (e) => {
+  e.preventDefault();
+  await payThen(() => {
+    gameOverEl.classList.remove('show');
+    startGameplay();
+  }, playAgainBtn);
+});
+
+/* ===== share to Farcaster (if available) ===== */
+shareBtn.addEventListener('click', async () => {
+  try {
+    // use Frame / miniapp sdk if available
+    const sdk = window.__FARC_SDK__;
+    if (sdk?.actions?.createCast) {
+      // create a simple cast with the score
+      await sdk.actions.createCast({ text: `I scored ${score} points on Reaction Clicker!` });
+      alert('Shared to Farcaster ✅');
+      return;
+    }
+    // fallback: try FrameSDK if present (older integration)
+    if (window.FrameSDK?.actions?.createCast) {
+      await window.FrameSDK.actions.createCast({ text: `I scored ${score} points on Reaction Clicker!` });
+      alert('Shared to Farcaster ✅');
+      return;
+    }
+    alert('Farcaster SDK not available here — open in Farcaster to share.');
+  } catch (err) {
+    console.error('Share failed', err);
+    alert('Share failed — check console or open in Farcaster.');
+  }
+});
+
+/* ===== initialize: try to call sdk ready for Frame integration ===== */
+(async function init() {
+  try {
+    // try the ESM miniapp SDK object if available
+    const sdk = window.__FARC_SDK__;
+    if (sdk?.actions?.ready) {
+      await sdk.actions.ready();
+    }
+  } catch (e) {
+    // ignore if not inside Farcaster
+  }
+})();
+</script>
+</body>
+</html>
