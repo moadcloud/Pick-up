@@ -1,0 +1,22 @@
+{
+  "version": "1",
+  "name": "Reaction Clicker",
+  "iconUrl": "https://cdn-icons-png.flaticon.com/512/992/992700.png",
+  "homeUrl": "https://pick-up-snowy.vercel.app/",
+  "imageUrl": "https://cdn.dribbble.com/users/190958/screenshots/3942045/reaction_dribbble.gif",
+  "buttonTitle": "Play Reaction Game",
+  "splashImageUrl": "https://cdn.dribbble.com/users/190958/screenshots/3942045/reaction_dribbble.gif",
+  "splashBackgroundColor": "#5c3aff",
+  "description": "Test your reflexes in this Farcaster mini game. Click fast, earn high scores, and compete with friends!",
+  "miniapp": {
+    "version": "1",
+    "name": "Reaction Clicker",
+    "iconUrl": "https://cdn-icons-png.flaticon.com/512/992/992700.png",
+    "homeUrl": "https://pick-up-snowy.vercel.app/",
+    "imageUrl": "https://cdn.dribbble.com/users/190958/screenshots/3942045/reaction_dribbble.gif",
+    "buttonTitle": "Start Game",
+    "splashImageUrl": "https://cdn.dribbble.com/users/190958/screenshots/3942045/reaction_dribbble.gif",
+    "splashBackgroundColor": "#5c3aff",
+    "description": "Click as fast as you can in this Farcaster mini app — powered by Base payments (0.00001 ETH to play)."
+  }
+}
