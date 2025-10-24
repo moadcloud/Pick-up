@@ -1,0 +1,17 @@
+{
+  "frame": {
+    "version": "next",
+    "name": "Game Farcaster",
+    "iconUrl": "https://pick-up-snowy.vercel.app/icon.png",
+    "homeUrl": "https://pick-up-snowy.vercel.app",
+    "imageUrl": "https://pick-up-snowy.vercel.app/api/og",
+    "button": {
+      "title": "Launch Game",
+      "action": {
+        "type": "launch_frame",
+        "name": "Game Farcaster",
+        "url": "https://pick-up-snowy.vercel.app"
+      }
+    }
+  }
+}
