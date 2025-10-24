@@ -7,11 +7,11 @@
   "miniapp": {
     "version": "1",
     "name": "REACTION CLICKER",
-    "iconUrl": "https://wallpapers.com/wallpapers/plastic-darts-and-dartboard-game-apjs3l2puqp2re3b.html",
-    "homeUrl": "https://wallpapers.com/wallpapers/plastic-darts-and-dartboard-game-apjs3l2puqp2re3b.html",
-    "imageUrl": "https://wallpapers.com/wallpapers/plastic-darts-and-dartboard-game-apjs3l2puqp2re3b.html",
+    "iconUrl": "https://wallpapers.com/images/high/plastic-darts-and-dartboard-game-apjs3l2puqp2re3b.webp",
+    "homeUrl": "https://wallpapers.com/images/high/plastic-darts-and-dartboard-game-apjs3l2puqp2re3b.webp",
+    "imageUrl": "https://wallpapers.com/images/high/plastic-darts-and-dartboard-game-apjs3l2puqp2re3b.webp",
     "buttonTitle": "Start GAME",
-    "splashImageUrl": "https://wallpapers.com/wallpapers/plastic-darts-and-dartboard-game-apjs3l2puqp2re3b.html",
+    "splashImageUrl": "https://wallpapers.com/images/high/plastic-darts-and-dartboard-game-apjs3l2puqp2re3b.webp",
     "splashBackgroundColor": "#5c3aff",
     "description": "Test your reflexes in this Farcaster mini game. Click fast, earn high scores, and compete with friends! Pay 0.00001 ETH on Base to play."
   }
