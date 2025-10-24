@@ -1,4 +1,11 @@
 {
+  "accountAssociation": {
+    "header": "eyJmaWQiOjUzNDM3NCwidHlwZSI6ImF1dGgiLCJrZXkiOiIweEExNEZBZjRFRTIwZTg0MTQ2QTkwMzMwMTk3MTQyNzI1Mzk5NTVERjMifQ",
+    "payload": "eyJkb21haW4iOiJwaWNrLXVwLXNub3d5LnZlcmNlbC5hcHAifQ",
+    "signature": "+Eebrha4nKS1KvWNCiSBjDnojMlfaeUr2Wa4KmTuNN0BWvVBo10lwMM+mNepwrJbKSUU68LUJDoapdNRq36JoBs="
+  }
+}
+{
   "frame": {
     "version": "next",
     "name": "Game Farcaster",
