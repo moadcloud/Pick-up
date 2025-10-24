@@ -1,20 +1,16 @@
 {
-  "accountAssociation": {
-    "header": "your-header-value",
-    "payload": "your-payload-value",
-    "signature": "your-signature-value"
-  },
   "frame": {
     "version": "next",
+    "name": "Game Farcaster",
+    "iconUrl": "https://pick-up-snowy.vercel.app/icon.png",
+    "homeUrl": "https://pick-up-snowy.vercel.app",
     "imageUrl": "https://pick-up-snowy.vercel.app/api/og",
     "button": {
-      "title": "View Frame",
+      "title": "Launch Game",
       "action": {
         "type": "launch_frame",
-        "name": "Your Frame Name",
-        "url": "https://pick-up-snowy.vercel.app",
-        "splashImageUrl": "https://pick-up-snowy.vercel.app/splash.png",
-        "splashBackgroundColor": "#ffffff"
+        "name": "Game Farcaster",
+        "url": "https://pick-up-snowy.vercel.app"
       }
     }
   }
