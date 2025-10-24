@@ -3,22 +3,16 @@
     "header": "eyJmaWQiOjUzNDM3NCwidHlwZSI6ImF1dGgiLCJrZXkiOiIweEExNEZBZjRFRTIwZTg0MTQ2QTkwMzMwMTk3MTQyNzI1Mzk5NTVERjMifQ",
     "payload": "eyJkb21haW4iOiJwaWNrLXVwLXNub3d5LnZlcmNlbC5hcHAifQ",
     "signature": "+Eebrha4nKS1KvWNCiSBjDnojMlfaeUr2Wa4KmTuNN0BWvVBo10lwMM+mNepwrJbKSUU68LUJDoapdNRq36JoBs="
-  }
-}
-{
-  "frame": {
-    "version": "next",
-    "name": "Game Farcaster",
-    "iconUrl": "https://pick-up-snowy.vercel.app/icon.png",
-    "homeUrl": "https://pick-up-snowy.vercel.app",
-    "imageUrl": "https://pick-up-snowy.vercel.app/api/og",
-    "button": {
-      "title": "Launch Game",
-      "action": {
-        "type": "launch_frame",
-        "name": "Game Farcaster",
-        "url": "https://pick-up-snowy.vercel.app"
-      }
-    }
+  },
+  "miniapp": {
+    "version": "1",
+    "name": "REACTION CLICKER",
+    "iconUrl": "https://cdn-icons-png.flaticon.com/512/992/992700.png",
+    "homeUrl": "https://pick-up-snowy.vercel.app/",
+    "imageUrl": "https://cdn.dribbble.com/users/190958/screenshots/3942045/reaction_dribbble.gif",
+    "buttonTitle": "Start GAME",
+    "splashImageUrl": "https://cdn.dribbble.com/users/190958/screenshots/3942045/reaction_dribbble.gif",
+    "splashBackgroundColor": "#5c3aff",
+    "description": "Test your reflexes in this Farcaster mini game. Click fast, earn high scores, and compete with friends! Pay 0.00001 ETH on Base to play."
   }
 }
